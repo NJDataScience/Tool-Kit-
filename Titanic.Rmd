@@ -1,0 +1,140 @@
+---
+title: "Initial Prep of Data (Titanic Dataset)"
+author: "Ramesh Natarajan"
+date: "November 10, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+### Set working directory here.
+```{r, include=TRUE}
+
+# For Home
+#setwd("C:/R/Kaggle ToolSet/WIP")
+
+# For Office
+setwd("C:/R")
+
+## One way to Load the data is through file explorer
+#Titanic_TrainData <- read.csv(file.choose()) 
+#Titanic_TestData <- read.csv(file.choose())
+```
+
+### Here we use Read the CSV File
+```{r, include=TRUE}
+Titanic_Data <- read.csv("Titanic Train.csv")  
+Titanic_Test <- read.csv("Titanic Test.csv")
+## sep = ";" (if separated by Colon) - lot of options for this command, Refer Help.
+```
+
+
+## Attribute Information:
+>VARIABLE DESCRIPTIONS:
+>survival        Survival            (0 = No; 1 = Yes)
+>pclass          Passenger Class     (1 = 1st; 2 = 2nd; 3 = 3rd)
+>name            Name
+>sex             Sex
+>age             Age
+>sibsp           Number of Siblings/Spouses Aboard
+>parch           Number of Parents/Children Aboard
+>ticket          Ticket Number
+>fare            Passenger Fare
+>cabin           Cabin
+>embarked        Port of Embarkation (C = Cherbourg; Q = Queenstown; S = Southampton)
+
+>SPECIAL NOTES:
+>Pclass is a proxy for socio-economic status (SES)
+> 1st ~ Upper; 2nd ~ Middle; 3rd ~ Lower
+
+>Age is in Years; Fractional if Age less than One (1)
+> If the Age is Estimated, it is in the form xx.5
+
+>With respect to the family relation variables (i.e. sibsp and parch)
+>some relations were ignored.  The following are the definitions used
+>for sibsp and parch.
+
+>Sibling:  Brother, Sister, Stepbrother, or Stepsister of Passenger Aboard Titanic
+>Spouse:   Husband or Wife of Passenger Aboard Titanic (Mistresses and Fiances Ignored)
+>Parent:   Mother or Father of Passenger Aboard Titanic
+>Child:    Son, Daughter, Stepson, or Stepdaughter of Passenger Aboard Titanic
+
+>Other family relatives excluded from this study include cousins,
+>nephews/nieces, aunts/uncles, and in-laws.  Some children travelled
+>only with a nanny, therefore parch=0 for them.  As well, some
+>travelled with very close friends or neighbors in a village, however,
+>the definitions do not support such relations.
+
+### Quick look at the dataset
+```{r, include=TRUE}
+str(Titanic_Data)
+head(Titanic_Data)
+tail(Titanic_Data)
+# Assign the Titanic_TrainDate to a Data Frame (df)
+df <- Titanic_Data
+```
+
+## Find out if any column value is missing.
+```{r, include=TRUE}
+anyNA(df)
+any(is.na(df))
+```
+False means there is nothing missing. True means the data file has empty values.
+
+# Find out the count of missing values (NA)
+```{r, include=TRUE}
+sapply(df, function(x) sum(is.na(x)))
+```
+
+# Grab only numeric columns
+```{r, include=TRUE}
+num.cols <- sapply(df, is.numeric)
+str(num.cols)
+```
+
+ 
+# Import Library for spliting
+## Let us split the TrainData File into Train, Validate.
+```{r, include=TRUE}
+library(caTools)
+
+# Set a random see so your "random" results are the same as this notebook
+set.seed(101) 
+
+# Split up the sample, basically randomly assigns a booleans to a new column "sample"
+sample <- sample.split(df$Survived, SplitRatio = 0.70) # SplitRatio = percent of sample==TRUE
+
+# Training Data
+Titanic_Train = subset(df, sample == TRUE)
+
+# Testing Data
+Titanic_Valid = subset(df, sample == FALSE)
+```
+
+
+# Check the split
+```{r, include=TRUE}
+str(Titanic_Train)
+str(Titanic_Valid)
+# We have already populated the Titanic_test in the begining
+str(Titanic_Test)
+```
+
+# Write the Train, Validate, Test Datasets in a file as a backup.
+```{r, include=TRUE}
+write.csv(Titanic_Train, file = "Titanic_Train.CSV")
+write.csv(Titanic_Valid, file = "Titanic_Valid.CSV")
+# We have already populated the Titanic_test in the begining
+write.csv(Titanic_Test, file  = "Titanic_Test.CSV")
+```
+
+#### You can visit the directory and check 

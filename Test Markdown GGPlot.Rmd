@@ -1,0 +1,206 @@
+---
+title: "GGPlot with Transfusion Data"
+author: "Ramesh"
+date: "October 30, 2016"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+## Set working directory here.
+```{r, include=TRUE}
+setwd("C:/downloads")
+```
+
+## Load the data through file explorer
+```{r}
+# transFusionData <- read.csv(file.choose()) 
+```
+
+## Read the CSV File
+```{r, include=TRUE}
+transFusionData <- read.csv("transfusion.data")  
+## sep = ";" (if separated by Colon) - lot of options for this command, Refer Help.
+```
+
+## Now that you have read the file, do basic analysis
+```{r, include=TRUE}
+head(transFusionData)
+tail(transFusionData)
+colnames(transFusionData)
+str(transFusionData)
+```
+
+## Read the content as data frame
+```{r, include=TRUE}
+df <- data.frame(transFusionData)
+```
+
+## Now that you have assigned the dataframe, Confirm the assignment, do basic analysis
+```{r, include=TRUE}
+head(df)
+str(df)
+```
+
+## Find out if any column value is missing.
+```{r, include=TRUE}
+anyNA(df)
+```
+False means there is nothing missing
+
+## Change the column names to be meaningful and easy to manage
+```{r, include=TRUE}
+cols <- c("Recency","Frequency","Monetary","Time", "Donated")
+colnames(df) <- cols
+## Ensure the names were changed.
+str(df)
+```
+
+# Include the GGPlot2 Library.
+```{r, include=TRUE}
+library(ggplot2)
+```
+
+#Attribute Information:
+
+Given is the variable name, variable type, the measurement unit and a brief description. The "Blood Transfusion Service Center" is a classification problem. The order of this listing corresponds to the order of numerals along the rows of the database. 
+
+R (Recency - months since last donation), 
+F (Frequency - total number of donation), 
+M (Monetary - total blood donated in c.c.), 
+T (Time - months since first donation), and 
+a binary variable representing whether he/she donated blood in March 2007 (1 stand for donating blood; 0 stands for not donating blood). 
+
+
+# Now that we have confirmed all the data, let us proceed to GGPlot 
+```{r, include=TRUE}
+pl <- ggplot(data=df, aes(x=Donated, y=Recency))
+pl + geom_point()
+```
+The plot indicates that People donate blood if the months since last donation is below 30. If the duration is longer than 30, people do not donate blood. Also on the oter hand, if the month exceeds 30, they are not likely to donate blood.
+
+# Now that we have confirmed all the data, let us proceed to GGPlot 
+```{r, include=TRUE}
+pl2 <- ggplot(data=df, aes(x=Donated, y=Frequency))
+pl2 + geom_point()
+```
+Most of the times, people donated lesser than 25 times. People with higher number of donations are sparse.
+
+# Now that we have confirmed all the data, let us proceed to GGPlot 
+```{r, include=TRUE}
+pl3 <- ggplot(data=df, aes(x=Donated, y=Monetary))
+pl3 + geom_point()
+```
+Most of the times, people donated lesser than 6000 cc of blood. People with higher number of donations are sparse.
+
+# We can have different theme as a background
+```{r, include=TRUE}
+theme0 = plot + theme_bw()         # Lookup Theme to change the background.
+print(theme0)
+```
+This one shows white background
+
+# Histogram Graph - Single Continous data
+```{r, include=FALSE}
+str(df)
+summary(df)
+# Create histogram with Time Predictor
+hist1 <- ggplot(data=df, aes(x=Time)) + geom_histogram()
+print(hist1)
+```
+People give blood if the months between the donation is less than 25. As the number of months increase beyond, the number
+drops considerably. 
+
+# Histogram Graph - Single Discrete data
+```{r, include=FALSE}
+hist2 <- ggplot(data=df, aes(x=Frequency)) + geom_histogram()
+print(hist2)
+```
+The total number of times people donated drops considerably, after 15.
+
+# Add Color
+```{r, include=FALSE}
+hist2 + geom_histogram(color='blue')   # outlines the bar with blue color.
+
+# Add Labels, Title
+hist2 + xlab('Frquency of Donation') + ylab('Counts') 
+hist2 + ggtitle('Comparison of Frequency Donation')
+
+# Adding altogether
+hist2 + geom_histogram(color='blue', fill='blue') + xlab('Frquency of Donation') + ylab('Counts') + ggtitle('Comparison of Frequency Donation')
+```
+
+# Scatterplots
+
+# two variables & continuous 
+```{r, include=TRUE}
+Splot1 = ggplot(data=df, aes(x=Frequency, y=Time))
+Splot1 + geom_point()
+
+Splot1 + geom_point(size=4)
+Splot1 + geom_point(size=4, alpha=.5)
+
+# Something like Bubble Graph 
+Splot1 + geom_point(aes(size=Monetary))
+
+# Something like Bubble Graph with Color
+# color by different variable - Useful for segmentation
+Splot1 + geom_point(aes(color=Monetary))
+
+```
+
+# Barplot
+# Generaly used to display Counts with Categorical data. 
+# (Difference between histogram - Continuous and discrete numbers)
+```{r, include=TRUE}
+# In this dataset we do not have any categorical data.
+
+# Recode a new column 
+# Add a Column to the Data frame
+df$donatedFlag <- NA
+str(df)
+
+df$donatedFlag[df$Donated == 1] <- "Yes"
+df$donatedFlag[df$Donated == 0] <- "No"
+
+# Ensure the values are substituted properly for DonatedFlag
+head(df)
+tail(df)
+```
+
+# Now that we added Categorical data, let us do the Barplot
+```{r, include=TRUE}
+barplot1 <- ggplot(df, aes(x=Donated))
+barplot1 + geom_bar()
+
+# Color the bars
+barplot1 + geom_bar(fill='blue')
+```
+
+# Box Plot
+# Mainly used to display distribution of Numerical variables.
+```{r, include=TRUE}
+boxplot1 <- ggplot(df, aes(x=Donated, y=Recency))
+boxplot1 + geom_boxplot()
+
+boxplot1 <- ggplot(df, aes(x=Donated, y=Time))
+boxplot1 + geom_boxplot()
+
+boxplot1 <- ggplot(df, aes(x=Donated, y=Monetary))
+boxplot1 + geom_boxplot()
+
+# Bottom - 1st Qtile, Center - Median, Top - 3rd Qtile
+
+# We can add color
+boxplot1 + geom_boxplot(aes(fill=factor(donatedFlag)))
+
+```
+
